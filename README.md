@@ -30,6 +30,7 @@ already running, so `streamlit run dashboard.py` alone also works).
 | `/features` | ~20 market-state features |
 | `/forecast` | probability cones (10/25/50/75/90%) per horizon |
 | `/report` | driver bullets + risk tilt + disclaimer |
+| `/backtest` | walk-forward calibration audit (hit rates of the 50%/80% bands) |
 | `/all` | everything in one payload (used by the dashboard) |
 
 ## Data sources (all keyless)
@@ -61,7 +62,9 @@ app works offline-ish and doesn't hammer sources.
 - [ ] Phase 0 study: test whether a Google Trends / news-sentiment index adds
       out-of-sample value over the baseline → decides feature weights
 - [ ] Phase 2: LLM narrative layer + GDELT/news sentiment
-- [ ] Phase 3: backtest UI (how often did bands contain the realized price?)
+- [x] Phase 3: backtest UI (how often did bands contain the realized price?) — live on
+      the dashboard: 237 walk-forward test days, hit50 58–71% (vs 50% expected),
+      hit80 87–90% (vs 80%): bands overstate risk → next model iteration tightens vol
 - [ ] Phase 4: basic token auth + daily scheduled run for a small group
 
 ## Files
@@ -73,5 +76,6 @@ data_pull.py    keyless data fetching + file cache
 features.py     feature engineering (snapshot of market state)
 forecast.py     quantile cone engine
 report.py       template driver report
+backtest.py     walk-forward calibration audit (also /backtest endpoint)
 data/           cache (auto-created)
 ```

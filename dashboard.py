@@ -181,6 +181,54 @@ st.subheader("What's driving the outlook")
 for b in report_data.get("bullets", []):
     st.markdown(f"• {b}")
 
+st.divider()
+st.subheader("Calibration audit (walk-forward backtest)")
+try:
+    bt = requests.get(f"{API_URL}/backtest", timeout=180).json()
+    order = ["1", "5", "21", "63"]
+    per = bt.get("per_horizon", {})
+    labels = [per[k]["label"] for k in order if k in per]
+    hit50 = [per[k]["hit50_pct"] for k in order if k in per]
+    hit80 = [per[k]["hit80_pct"] for k in order if k in per]
+
+    fig2 = go.Figure()
+    fig2.add_trace(go.Bar(name="50% band hit rate", x=labels, y=hit50, marker_color="#1f77b4"))
+    fig2.add_trace(go.Bar(name="80% band hit rate", x=labels, y=hit80, marker_color="#ff7f0e"))
+    fig2.add_hline(y=50, line_dash="dot", line_color="#1f77b4", annotation_text="expected 50%")
+    fig2.add_hline(y=80, line_dash="dot", line_color="#ff7f0e", annotation_text="expected 80%")
+    fig2.update_layout(
+        height=360,
+        barmode="group",
+        margin=dict(l=10, r=10, t=30, b=10),
+        title=f"Hit rates vs expectation ({bt.get('window', '')} · {bt.get('test_dates')} test days)",
+    )
+    st.plotly_chart(fig2, use_container_width=True)
+
+    table_rows = []
+    for k in order:
+        if k not in per:
+            continue
+        s = per[k]
+        table_rows.append(
+            {
+                "Horizon": s["label"],
+                "Test days": s["n"],
+                "Hit 50% band": f'{s["hit50_pct"]}%',
+                "Hit 80% band": f'{s["hit80_pct"]}%',
+                "Directional acc": f'{s["directional_acc_pct"]}%',
+                "Median gap vs p50": f'{s["median_gap_pct"]:+.2f}%',
+            }
+        )
+    st.dataframe(table_rows, use_container_width=True, hide_index=True)
+    st.caption(
+        "How to read: a well-calibrated model lands near the 50% / 80% lines. "
+        "**Above the line = bands too wide (model overstates uncertainty); below = too "
+        "narrow (understates risk).** A positive median gap in a rising market means the "
+        "median forecast ran below what actually happened."
+    )
+except Exception as exc:  # noqa: BLE001
+    st.warning(f"Backtest unavailable: {exc}")
+
 with st.expander("Sources & methodology"):
     for s in report_data.get("sources", []):
         st.markdown(f"- {s}")

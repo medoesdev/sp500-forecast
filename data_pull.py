@@ -200,6 +200,11 @@ def get_vix(ttl_seconds: float = 900) -> pd.DataFrame:
     return _cached("vix", ttl_seconds, lambda: _yahoo_chart("^VIX", VIX_RANGE))
 
 
+def get_vix_long(ttl_seconds: float = 86400) -> pd.DataFrame:
+    """Daily VIX closes (column: close), last 2 years (for backtesting)."""
+    return _cached("vix_long", ttl_seconds, lambda: _yahoo_chart("^VIX", SPX_RANGE))
+
+
 def get_dgs10(ttl_seconds: float = 86400) -> pd.DataFrame:
     """10Y Treasury yield in percent (column: value). Yahoo ^TNX primary,
     FRED DGS10 fallback."""

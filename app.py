@@ -13,6 +13,8 @@ import features
 import forecast
 import report
 
+import backtest
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -51,7 +53,7 @@ def root() -> dict:
     return {
         "name": app.title,
         "version": app.version,
-        "endpoints": ["/health", "/prices", "/features", "/forecast", "/report", "/all"],
+        "endpoints": ["/health", "/prices", "/features", "/forecast", "/report", "/backtest", "/all"],
     }
 
 
@@ -108,6 +110,12 @@ def get_report() -> dict:
     feats = features.compute_features(market)
     cones = forecast.forecast_cones(market["spx"], feats)
     return report.build_report(cones, feats, market["spx"])
+
+
+@app.get("/backtest")
+def get_backtest(force: bool = False) -> dict:
+    """Walk-forward calibration audit of the cone model (cached, ?force=true to rerun)."""
+    return backtest.get_backtest(force=force)
 
 
 @app.get("/all")
