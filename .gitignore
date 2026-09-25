@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# App cache (fetched market data, auto-recreated)
+data/
+
+# Tooling / screenshots
+.openchamber/
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Environment / secrets
+.env
+
+# Logs
+*.log
